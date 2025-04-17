@@ -1,0 +1,213 @@
+body {
+        margin: 0;
+        font-family: 'Georgia', serif;
+        background: linear-gradient(to right, #f9f3e7, #fce8d5);
+      }
+
+      .header {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: #8e44ad;
+        padding: 10px;
+        background-color: #fff8f0;
+        border: 3px solid #d4af37;
+        border-radius: 20px;
+        margin: 0px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        line-height: 1.1;
+      }
+
+      .ticker {
+        background-color: #f7d794;
+        padding: 2px;
+        font-size: 12px;
+        font-weight: bold;
+        color: #6d214f;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .ticker span {
+        display: inline-block;
+        padding-left: 100%;
+        animation: scroll-left 30s linear infinite;
+      }
+
+      @keyframes scroll-left {
+        0% {
+          transform: translateX(0);
+        }
+
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      .nav-tabs {
+        display: flex;
+        justify-content: center;
+        background-color: #fff8f0;
+        border-bottom: 3px solid #d4af37;
+        flex-wrap: wrap;
+      }
+
+      .nav-tabs a {
+        padding: 5px 40px;
+        margin: 5px;
+        text-decoration: none;
+        color: #5e3370;
+        background-color: #f9e2c7;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: background 0.3s;
+      }
+
+      w .nav-tabs a:hover,
+      .nav-tabs a.active-tab {
+        background-color: #ffd699;
+      }
+
+      .tab-content {
+        display: none;
+        padding: 20px;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .banner-images img {
+        width: 100%;
+        max-width: 800px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      input,
+      button {
+        display: block;
+        width: 100%;
+        max-width: 400px;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #8e44ad;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #8e44ad;
+        padding: 10px;
+        background-color: #fff8f0;
+        border-top: 2px solid #d4af37;
+        margin-top: 40px;
+        border-bottom: 2px solid #d4af37;
+      }
+
+      #hundiTable {
+        width: 80%;
+        margin: 30px auto;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 2px solid #d4af37;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-family: 'Georgia', serif;
+        color: #8e44ad;
+        background-color: #fffdf5;
+      }
+
+      #hundiTable th,
+      #hundiTable td {
+        text-align: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e0c97f;
+        font-size: 16px;
+      }
+
+      #hundiTable thead {
+        background-color: #fdf0d5;
+        font-weight: bold;
+      }
+
+      #hundiTable tfoot {
+        background-color: #f5e7cc;
+      }
+
+      #hundiTable td.amount {
+        cursor: text;
+      }
+
+      #hundiTable td[contenteditable="true"]:focus {
+        background-color: #fef9e7;
+        outline: 2px dashed #d4af37;
+      }
+
+      .tooltip-icon {
+        position: relative;
+        display: inline-block;
+        margin-left: 6px;
+        color: #8e44ad;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .tooltip-icon .tooltiptext {
+        visibility: hidden;
+        width: 100px;
+        background-color: #fffaf0;
+        color: #8e44ad;
+        text-align: center;
+        border-radius: 6px;
+        border: 1px solid #d4af37;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        /* Position above */
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-size: 10px;
+      }
+
+      .tooltip-icon:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+    
+
+
+      body {
+        font-family: Arial;
+        padding: 10px;
+      }
+
+      .expense {
+        margin: 0px 0;
+      }
+
+      .hidden {
+        display: none;
+      }
+    
+
+
+    #data2025 {
+      display: none;
+    }
