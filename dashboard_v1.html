@@ -22,7 +22,7 @@
         border-radius: 20px;
         margin: 0px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        line-height: 1.1;
+        line-height: 1.5;
       }
 
       .ticker {
@@ -197,6 +197,33 @@
         visibility: visible;
         opacity: 1;
       }
+	  
+	  #passkeyModal input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+#passkeyModal button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#passkeyModal button:first-child {
+  background-color: #8e44ad;
+  color: white;
+}
+
+#passkeyModal button:last-child {
+  background-color: #e0e0e0;
+}
+
     </style>
     <script>
       function showTab(id) {
@@ -270,9 +297,9 @@
     </div>
     <div class="nav-tabs">
       <a href="#" onclick="showTab('home')" data-tab="home">🏠 Home</a>
-      <a href="#" onclick="showTab('hundi')" data-tab="hundi">💰 Hundi Collections</a>
+      <a href="#" onclick="showPasskeyModalFor('hundi')" data-tab="hundi">💰 Hundi Collections</a>
       <a href="#" onclick="showTab('expenses')" data-tab="expenses">🧾 Temple Expenses</a>
-      <a href="#" onclick="showTab('account')" data-tab="account">📒 Account Tracking</a>
+      <a href="#" onclick="showPasskeyModalFor('account')" data-tab="account">📒 Account Tracking</a>
       <a href="#" onclick="showTab('contact')" data-tab="contact">📞 Contact Us</a>
     </div>
     <div class="main">
@@ -1180,12 +1207,78 @@
     filterData();
   </script>
   
+<script>
+  const HUNDI_PASSKEY = "hundi123";
+  const ACCOUNT_PASSKEY = "account123"; // set your desired password here
+
+  let hasHundiAccess = false;
+  let hasAccountAccess = false;
+  let currentProtectedTab = null;
+
+  function showPasskeyModalFor(tabId) {
+  document.getElementById("passkeyTitle").innerText = 
+  tabId === "hundi" ? "🔐 Enter Passkey for Hundi Collections" : "🔐 Enter Passkey for Account Tracking";
+    // If already unlocked, hide the tab and re-prompt
+    if ((tabId === "hundi" && hasHundiAccess) || (tabId === "account" && hasAccountAccess)) {
+      if (tabId === "hundi") hasHundiAccess = false;
+      if (tabId === "account") hasAccountAccess = false;
+
+      showTab("home"); // Hide the protected tab first
+
+      setTimeout(() => {
+        currentProtectedTab = tabId;
+        document.getElementById("passkeyModal").style.display = "flex";
+        document.getElementById("passkeyInput").value = "";
+      }, 200);
+    } else {
+      currentProtectedTab = tabId;
+      document.getElementById("passkeyModal").style.display = "flex";
+      document.getElementById("passkeyInput").value = "";
+    }
+  }
+
+  function closePasskeyModal() {
+    document.getElementById("passkeyModal").style.display = "none";
+  }
+
+  function submitPasskey() {
+    const entered = document.getElementById("passkeyInput").value;
+    if (currentProtectedTab === "hundi" && entered === HUNDI_PASSKEY) {
+      hasHundiAccess = true;
+      closePasskeyModal();
+      showTab('hundi');
+    } else if (currentProtectedTab === "account" && entered === ACCOUNT_PASSKEY) {
+      hasAccountAccess = true;
+      closePasskeyModal();
+      showTab('account');
+    } else {
+      alert("Incorrect passkey. Try again.");
+    }
+  }
+</script>
+  
           <div id="contact" class="tab-content">
             <h2 style="color: #8e44ad; text-align: left;">Contact Us</h2>
             <p>Email: sgvsvd@gmail.com</p>
             <p>Phone: +91-9493385440 || 9347257727</p>
             <p>Address: Sri Gurava Veera Vengamamba Devarillu, Vemuri vari palle, Vaddepalem, Narrawada, Nellore Dist.</p>
           </div>
+		  
+		  <!-- Passkey Modal -->
+<div id="passkeyModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+  background-color: rgba(0, 0, 0, 0.6); z-index: 1000; justify-content: center; align-items: center;">
+
+  <div style="background-color: #fff8f0; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); width: 90%; max-width: 400px; text-align: center;">
+    <!--<h3 style="color: #8e44ad;">🔐 Enter Passkey</h3>-->
+	<h3 id="passkeyTitle" style="color: #8e44ad;">🔐 Enter Passkey</h3>
+    <input type="password" id="passkeyInput" placeholder="Enter password..." style="margin-top: 15px;" />
+    <div style="margin-top: 20px;">
+      <button onclick="submitPasskey()">Submit</button>
+      <button onclick="closePasskeyModal()" style="background-color: #ccc; color: #333;">Cancel</button>
+    </div>
+  </div>
+</div>
+
   </body>
   <div class="footer"> © SGVSVD Temple </div>
 </html>
