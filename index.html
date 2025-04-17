@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>SGVSVD Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Georgia', serif;
+        background: linear-gradient(to right, #f9f3e7, #fce8d5);
+      }
+
+      .header {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        color: #8e44ad;
+        padding: 10px;
+        background-color: #fff8f0;
+        border: 3px solid #d4af37;
+        border-radius: 20px;
+        margin: 0px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        line-height: 1.1;
+      }
+
+      .ticker {
+        background-color: #f7d794;
+        padding: 2px;
+        font-size: 12px;
+        font-weight: bold;
+        color: #6d214f;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .ticker span {
+        display: inline-block;
+        padding-left: 100%;
+        animation: scroll-left 30s linear infinite;
+      }
+
+      @keyframes scroll-left {
+        0% {
+          transform: translateX(0);
+        }
+
+        100% {
+          transform: translateX(-100%);
+        }
+      }
+
+      .nav-tabs {
+        display: flex;
+        justify-content: center;
+        background-color: #fff8f0;
+        border-bottom: 3px solid #d4af37;
+        flex-wrap: wrap;
+      }
+
+      .nav-tabs a {
+        padding: 5px 40px;
+        margin: 5px;
+        text-decoration: none;
+        color: #5e3370;
+        background-color: #f9e2c7;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: background 0.3s;
+      }
+
+      w .nav-tabs a:hover,
+      .nav-tabs a.active-tab {
+        background-color: #ffd699;
+      }
+
+      .tab-content {
+        display: none;
+        padding: 20px;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .banner-images img {
+        width: 100%;
+        max-width: 800px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      input,
+      button {
+        display: block;
+        width: 100%;
+        max-width: 400px;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #8e44ad;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: #8e44ad;
+        padding: 10px;
+        background-color: #fff8f0;
+        border-top: 2px solid #d4af37;
+        margin-top: 40px;
+        border-bottom: 2px solid #d4af37;
+      }
+
+      #hundiTable {
+        width: 80%;
+        margin: 30px auto;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 2px solid #d4af37;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-family: 'Georgia', serif;
+        color: #8e44ad;
+        background-color: #fffdf5;
+      }
+
+      #hundiTable th,
+      #hundiTable td {
+        text-align: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e0c97f;
+        font-size: 16px;
+      }
+
+      #hundiTable thead {
+        background-color: #fdf0d5;
+        font-weight: bold;
+      }
+
+      #hundiTable tfoot {
+        background-color: #f5e7cc;
+      }
+
+      #hundiTable td.amount {
+        cursor: text;
+      }
+
+      #hundiTable td[contenteditable="true"]:focus {
+        background-color: #fef9e7;
+        outline: 2px dashed #d4af37;
+      }
+
+      .tooltip-icon {
+        position: relative;
+        display: inline-block;
+        margin-left: 6px;
+        color: #8e44ad;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .tooltip-icon .tooltiptext {
+        visibility: hidden;
+        width: 100px;
+        background-color: #fffaf0;
+        color: #8e44ad;
+        text-align: center;
+        border-radius: 6px;
+        border: 1px solid #d4af37;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        /* Position above */
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-size: 10px;
+      }
+
+      .tooltip-icon:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
+    <script>
+      function showTab(id) {
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        const links = document.querySelectorAll('.nav-tabs a');
+        links.forEach(link => link.classList.remove('active-tab'));
+        document.querySelector(`.nav-tabs a[data-tab="${id}"]`).classList.add('active-tab');
+      }
+
+      function calculateTotal() {
+        let total = 0;
+        document.querySelectorAll('#hundiBody .amount').forEach(cell => {
+          const val = parseFloat(cell.innerText.replace(/[^0-9.]/g, '')) || 0;
+          total += val;
+        });
+        document.getElementById('totalAmount').innerText = '₹' + total.toLocaleString('en-IN');
+      }
+      document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('amount')) {
+          calculateTotal();
+        }
+      });
+      window.onload = () => {
+        showTab('home');
+        calculateTotal();
+      };
+    </script>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 10px;
+      }
+
+      .expense {
+        margin: 0px 0;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+	
+	<title>Year Filter</title>
+  <style>
+    #data2025 {
+      display: none;
+    }
+  </style>
+  
+    <script>
+      function filterExpenses() {
+        const selectedFY = document.getElementById('fySelect').value;
+        const expenses = document.querySelectorAll('.expense');
+        expenses.forEach(expense => {
+          if (selectedFY && expense.dataset.fy === selectedFY) {
+            expense.classList.remove('hidden');
+          } else {
+            expense.classList.add('hidden');
+          }
+        });
+      }
+    </script>
+	 
+  </head>
+  <body>
+    <div class="header"> శ్రీ గురవవీర సమేత వేంగమాంబ దేవరిళ్లు, వేమూరి వారి పల్లె, వడ్డేపాలెం, నర్రవాడ, నెల్లూరు జిల్లా. <br> Sri Guravaveera sametha Vengamamba Devarillu, Vemuri vari palle, Vaddepalem, Narrawada, Nellore Dist. </div>
+    <div class="ticker">
+      <span>🙏 Welcome to SGVSVD Temple Dashboard | శ్రీ వేంగమాంబ దేవస్థానం డాష్‌బోర్డ్‌కి స్వాగతం 🙏 || Track Temple Hundi Collections, Expenses, Temple account Balance and Interest</span>
+    </div>
+    <div class="nav-tabs">
+      <a href="#" onclick="showTab('home')" data-tab="home">🏠 Home</a>
+      <a href="#" onclick="showTab('hundi')" data-tab="hundi">💰 Hundi Collections</a>
+      <a href="#" onclick="showTab('expenses')" data-tab="expenses">🧾 Temple Expenses</a>
+      <a href="#" onclick="showTab('account')" data-tab="account">📒 Account Tracking</a>
+      <a href="#" onclick="showTab('contact')" data-tab="contact">📞 Contact Us</a>
+    </div>
+    <div class="main">
+      <div id="home" class="tab-content active">
+        <h3 style="color: #8e44ad; text-align: center;">Welcome to Vemuri Vari Devarillu Temple Dashboard</h3>
+        <div style="text-align: center; margin-top: 20px;">
+          <img src="C:/Users/venga/OneDrive/Desktop/SGVVD/temple.jpg" alt="Temple Banner" style="width: 35%; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+          <!--<img src="C:/Users/venga/OneDrive/Desktop/SGVVD/god.jpg" alt="Temple Banner" style="width: 50%; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">-->
+        </div>
+      </div>
+      <div id="hundi" class="tab-content">
+        <h3 style="color: #8e44ad; text-align: center;">Yearly Hundi Collections</h3>
+        <table id="hundiTable">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Year</th>
+              <th>Amount (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="hundiBody">
+            <tr>
+              <td>1</td>
+              <td>2024</td>
+              <td class="amount" contenteditable="true">30,550</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td> 2023 <span class="tooltip-icon">ℹ️ <span class="tooltiptext">Hundi & Total Temple Amount</span>
+                </span>
+              </td>
+              <td class="amount" contenteditable="true">1,76,051</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="text-align: right; font-weight: bold;">Total:</td>
+              <td style="font-weight: bold;">₹2,06,601</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="expenses" class="tab-content">
+		<h3	style="color: #8e44ad; text-align: center;>
+								<label for=" fySelect" > Select Financial Year:</label>
+        <select id="fySelect" onchange="filterExpenses()" >
+          <option value="">Select FY</option>
+          <!--<option value="2025-2026">2025-2026</option>-->
+          <option value="2024-2025" >2024-2025</option>
+          <option value="2023-2024">2023-2024</option>
+        </select></h3>
+        <div id="expenses">
+          <!--<div id="expenses"><div class="expense hidden" data-fy="2025-2026"><h3 style="color: #8e44ad; text-align: center;">Temple June2025 - May2026 FY Not Yet Started</h3></div>-->
+          <div class="expense hidden" data-fy="2023-2024">
+            <h3 style="color: #8e44ad; text-align: center;">Temple June2023 - May2024 FY Details Not Avialble</h3>
+          </div>
+          <div class="expense hidden" data-fy="2024-2025">
+            <h3 style="color: #8e44ad; text-align: center;">Temple June2024 - May2025 Expenses Details</h3>
+            <table id="hundiTable">
+              <thead>
+                <tr>
+                  <td>S.No</td>
+                  <td>Names</td>
+                  <td>Location</td>
+                  <td>Month</td>
+                  <td>Amount</td>
+                  <td>Poojari</td>
+                  <td>Cleaning</td>
+                  <td>Poola Malalu</td>
+                  <td>Current Bill</td>
+                  <td>CC Recharge</td>
+                  <td>Others</td>
+                  <td>Other Amount</td>
+                  <td>Total Spent Amount</td>
+                </tr>
+              </thead>
+              <tbody id="hundiBody">
+                <tr>
+                  <td>1</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Nellore</td>
+                  <td>June</td>
+                  <td>10,000</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>666</td>
+                  <td>Tirunala</td>
+                  <td>10,000</td>
+                  <td>10,666</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Vemuri Musalaiah</td>
+                  <td>Hyderabad</td>
+                  <td>July</td>
+                  <td>13,000</td>
+                  <td>5,200</td>
+                  <td>0</td>
+                  <td>1,280</td>
+                  <td>300</td>
+                  <td>0</td>
+                  <td>Extra Expenses <span class="tooltip-icon">ℹ️ <span class="tooltiptext">Extra Poolamalalu - 200 <br>Note:3000 Extra credited in December for using Temple Construction Material </span>
+                    </span>
+                  </td>
+                  <td>200</td>
+                  <td>6,980</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Hyderabad</td>
+                  <td>August</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>1,500</td>
+                  <td>1,280</td>
+                  <td>260</td>
+                  <td>0</td>
+                  <td>Washing Cloths</td>
+                  <td>1,100</td>
+                  <td>9,340</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Karimnagar</td>
+                  <td>September</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>1,500</td>
+                  <td>1,280</td>
+                  <td>250</td>
+                  <td>299</td>
+                  <td>Extra Expenses <span class="tooltip-icon">ℹ️ <span class="tooltiptext">Petrol - 1500 <br>Prasadam - 400 <br>Other - 900 </span>
+                    </span>
+                  </td>
+                  <td>2,800</td>
+                  <td>11,329</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Maharastra</td>
+                  <td>October</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>1,500</td>
+                  <td>1,280</td>
+                  <td>220</td>
+                  <td>509</td>
+                  <td>Washing Cloths</td>
+                  <td>750</td>
+                  <td>9,459</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>Vemuri Guravaiah</td>
+                  <td>Hyderabad</td>
+                  <td>November</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>11,500</td>
+                  <td>1,280</td>
+                  <td>248</td>
+                  <td>0</td>
+                  <td>Extra Expenses <span class="tooltip-icon">ℹ️ <span class="tooltiptext">Extra 16 Poolamalalu (1280) <br>Mamidakulu (100) </span>
+                    </span>
+                  </td>
+                  <td>1,380</td>
+                  <td>19,608</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>Vemuri Ankaiah</td>
+                  <td>Vinjamur</td>
+                  <td>December</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>0</td>
+                  <td>1,280</td>
+                  <td>311</td>
+                  <td>0</td>
+                  <td>NA</td>
+                  <td>0</td>
+                  <td>6,791</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>Vemuri Guravaiah</td>
+                  <td>Narrawada</td>
+                  <td>January</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>0</td>
+                  <td>1,280</td>
+                  <td>355</td>
+                  <td>1,018</td>
+                  <td>Thota Vari Shop</td>
+                  <td>1,400</td>
+                  <td>9,253</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>Vemuri Venkateswarlu</td>
+                  <td>Bhimavaram</td>
+                  <td>February</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>0</td>
+                  <td>1,280</td>
+                  <td>348</td>
+                  <td>0</td>
+                  <td>Extra Expenses <span class="tooltip-icon">ℹ️ <span class="tooltiptext">Extra 4 Poolamalalu - 320 <br>New Kireetalu - 3700 <br>New Haralu - 2700 <br>New Thala Paga - 350 <br>Devudi Batalu - 1000 <br>Poola Malalu, Arati pilakalu, Mamidakulu - 1100 <br>Pooja samanulu - 1200 <br>Pandlu - 400 <br>Milk, Curd - 200 <br>Poojari - 1000 <br>Temple Cleaning - 500 </span>
+                    </span>
+                  </td>
+                  <td>12,470</td>
+                  <td>19,298</td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Tumukur</td>
+                  <td>March</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>0</td>
+                  <td>1,280</td>
+                  <td>304</td>
+                  <td>0</td>
+                  <td>Extra Expenses <span class="tooltip-icon">ℹ️ <span class="tooltiptext">Poolamalalu - 400 <br>Door mats - 800 </span>
+                    </span>
+                  </td>
+                  <td>1,200</td>
+                  <td>7,984</td>
+                </tr>
+                <tr>
+                  <td>11</td>
+                  <td>Vemuri Pedda Venkateswarlu</td>
+                  <td>Nandipadu</td>
+                  <td>April</td>
+                  <td>10,000</td>
+                  <td>5,200</td>
+                  <td>0</td>
+                  <td>1,280</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>NA</td>
+                  <td>0</td>
+                  <td>6,480</td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>Vemuri Chinna Venkateswarlu</td>
+                  <td>Nandipadu</td>
+                  <td>May</td>
+                  <td>10,000</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>Vemuri Vengaiah (Ganachari)</td>
+                  <td>Narrawada</td>
+                  <td>June</td>
+                  <td>10,000</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>14</td>
+                  <td>Vemuri Venkata Ratnam</td>
+                  <td>Nellore</td>
+                  <td>NA</td>
+                  <td>10,000</td>
+                  <td></td>
+                  <td></td>
+                  <td>9000 <span class="tooltip-icon">ℹ️ <span class="tooltiptext">750rs per month (Tenkaylu) * 12 Months = 9000</span>
+                    </span>
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td>NA <span class="tooltip-icon">ℹ️ <span class="tooltiptext">Balance Amount Details</span>
+                    </span>
+                  </td>
+                  <td>1,000</td>
+                  <td>10,000</td>
+                </tr>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="4" style="text-align: center; font-weight: bold;">Total:</td>
+                  <td style="font-weight: bold;">1,43,000</td>
+                  <td style="font-weight: bold;">52,000</td>
+                  <td style="font-weight: bold;">16,000</td>
+                  <td style="font-weight: bold;">12,800</td>
+                  <td style="font-weight: bold;">2,596</td>
+                  <td style="font-weight: bold;">2,492</td>
+                  <td style="font-weight: bold;">NA</td>
+                  <td style="font-weight: bold;">31,300</td>
+                  <td style="font-weight: bold;">1,27,188</td>
+                </tr>
+                <tr>
+                <tr>
+                  <td colspan="9" style="text-align: center; font-weight: bold;">Balance:</td>
+                  <td colspan="13" style="font-weight: bold;">₹15,812</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+		  </div>
+		  </div>
+		  
+
+		
+        <div id="account" class="tab-content">
+			<h3	style="color: #8e44ad; text-align: center;>
+			<label for=" fySelect" style="font-weight: bold;">Select Financial Year:</label>
+        <select id="yearSelect" onchange="filterData()">
+			<option value="">Select</option>
+			<option value="2024">2024</option>
+			<option value="2023">2023</option>
+		</select></h3>
+        <div id="account">
+			<div id="data">
+			</div>
+          <!--<div id="expenses"><div class="expense hidden" data-fy="2025-2026"><h3 style="color: #8e44ad; text-align: center;">Temple June2025 - May2026 FY Not Yet Started</h3></div>-->
+          <div id="data2024">
+            <h3 style="color: #8e44ad; text-align: center;">Temple Till June 2024 Account Details</h3>
+            <table id="hundiTable">
+              <thead>
+				<tr>
+					<td>S. No</td>
+					<td>Name</td>
+					<td>Location</td>
+					<td>Jaldi Amount</td>
+					<td>Amount</td>
+					<td>Interest</td>
+					<td>Total</td>
+					<td>Paid Amount</td>
+					<td>Balance</td>
+					<td>Credit Amount</td>
+				</tr>
+				</thead>
+				<tbody id="hundiBody">
+				<tr>
+					<td>1</td>
+					<td>Vemuri Musalaiah</td>
+					<td>Hyderabad</td>
+					<td>0</td>
+					<td>50,000</td>
+					<td>12,000</td>
+					<td>62,000</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>2</td>
+					<td>Pelapudi Chinna Vengaiah</td>
+					<td></td>
+					<td>0</td>
+					<td>10,000</td>
+					<td>2,400</td>
+					<td>12,400</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>3</td>
+					<td>Metla Janakiram</td>
+					<td></td>
+					<td>0</td>
+					<td>2,000</td>
+					<td>480</td>
+					<td>2,480</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>4</td>
+					<td>Chinna (Duttalur Venkata Ratnam)</td>
+					<td></td>
+					<td>0</td>
+					<td>10,000</td>
+					<td>2,400</td>
+					<td>12,400</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>5</td>
+					<td>Vemuri Vengaiah</td>
+					<td>Tumukur</td>
+					<td>0</td>
+					<td>1,000</td>
+					<td>240</td>
+					<td>1,240</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>6</td>
+					<td>Misala Subbamma</td>
+					<td>Vijayawada</td>
+					<td>0</td>
+					<td>1,000</td>
+					<td>240</td>
+					<td>1,240</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>7</td>
+					<td>Thotaboyina Gangarao</td>
+					<td></td>
+					<td>0</td>
+					<td>500</td>
+					<td>120</td>
+					<td>620</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>8</td>
+					<td>Misala Bhoshamma</td>
+					<td></td>
+					<td>0</td>
+					<td>500</td>
+					<td>120</td>
+					<td>620</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>9</td>
+					<td>Gedaboyina Narasimhulu (Bhavani)</td>
+					<td></td>
+					<td>0</td>
+					<td>1,000</td>
+					<td>240</td>
+					<td>1,240</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>10</td>
+					<td>Misala Balaya</td>
+					<td></td>
+					<td>0</td>
+					<td>1,000</td>
+					<td>240</td>
+					<td>1,240</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>11</td>
+					<td>Misala gangaya</td>
+					<td></td>
+					<td>0</td>
+					<td>500</td>
+					<td>120</td>
+					<td>620</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>12</td>
+					<td>Vemuri Vengaiah</td>
+					<td>Karimnagar</td>
+					<td>0</td>
+					<td>10,000</td>
+					<td>2,400</td>
+					<td>12,400</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>13</td>
+					<td>Vemuri Pedha Venkateswarlu</td>
+					<td>Nandipadu</td>
+					<td>0</td>
+					<td>5,000</td>
+					<td>1,200</td>
+					<td>6,200</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>14</td>
+					<td>Vemuri Chinna Venkateswarlu</td>
+					<td>Nandipadu</td>
+					<td>0</td>
+					<td>10,000</td>
+					<td>2,400</td>
+					<td>12,400</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>15</td>
+					<td>Yeli Nellore (Venkata Ratnam)</td>
+					<td></td>
+					<td>0</td>
+					<td>10,000</td>
+					<td>2,400</td>
+					<td>12,400</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>16</td>
+					<td>Vemuri Vengaiah</td>
+					<td>Nellore</td>
+					<td>0</td>
+					<td>10,000</td>
+					<td>2,400</td>
+					<td>12,400</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>17</td>
+					<td>Vemuri Venkata Ratnam</td>
+					<td>Nellore</td>
+					<td>0</td>
+					<td>10,000</td>
+					<td>2,400</td>
+					<td>12,400</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>18</td>
+					<td>Vemuri Venkateswarlu</td>
+					<td>Bhimavaram</td>
+					<td>16,000</td>
+					<td>2,500</td>
+					<td>600</td>
+					<td>19,100</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>19</td>
+					<td>Vemuri Vengaiah (Ganachari)</td>
+					<td>Narrawada</td>
+					<td>0</td>
+					<td>15,376</td>
+					<td>7,380</td>
+					<td>22,756</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>20</td>
+					<td>Vemuri Vengaiah</td>
+					<td>Maharastra</td>
+					<td>12,000</td>
+					<td>500</td>
+					<td>240</td>
+					<td>12,740</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>21</td>
+					<td>Vemuri Venkata Ratnam</td>
+					<td>Nellore</td>
+					<td>0</td>
+					<td>27,725</td>
+					<td>13,308</td>
+					<td>41,033</td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				</tbody>
+				<tfoot>
+				  <tr>
+					<td colspan="3" style="text-align: center; font-weight: bold;">Total:</td>
+					<td style="font-weight: bold;">28,000</td>
+					<td style="font-weight: bold;">1,78,601</td>
+					<td style="font-weight: bold;">53,328</td>
+					<td style="font-weight: bold;">2,59,929</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					</tr>
+					<tr>
+					<td colspan="3" style="text-align: center; font-weight: bold;">Grand Total:</td>
+					<td colspan="2" style="font-weight: bold;">2,06,601</td>
+					<td style="font-weight: bold;">53,328</td>
+					<td style="font-weight: bold;">2,59,929</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					</tr>
+                </tr>
+              </tfoot>
+			</table>
+          </div>
+          <div id="data2023">
+            <h3 style="color: #8e44ad; text-align: center;">Temple Till June 2023 Account Details</h3>
+            <table id="hundiTable">
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Jaldi Amount</th>
+                  <th>Amount</th>
+                  <th>Interest</th>
+                  <th>Total</th>
+                  <th>Paid Amount</th>
+                  <th>Balance</th>
+                  <th>Credited Amount</th>
+                </tr>
+              </thead>
+              <tbody id="hundiBody">
+                <tr>
+                  <td>1</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Tumukur</td>
+                  <td>0</td>
+                  <td>1,000</td>
+                  <td>240</td>
+                  <td>1,240</td>
+                  <td>1,240</td>
+                  <td>0</td>
+                  <td class="amount" contenteditable="true">1,240</td>
+                <tr>
+                  <td>2</td>
+                  <td>Metla Janakiram</td>
+                  <td>Narrawada</td>
+                  <td>0</td>
+                  <td>1,000</td>
+                  <td>240</td>
+                  <td>1,240</td>
+                  <td>1,240</td>
+                  <td>0</td>
+                  <td>1,300</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Pelakuru Ramakrishna</td>
+                  <td>Tumukur</td>
+                  <td>0</td>
+                  <td>5,000</td>
+                  <td>1,200</td>
+                  <td>6,200</td>
+                  <td>6,200</td>
+                  <td>0</td>
+                  <td>6,200</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>Vemuri Musalaiah</td>
+                  <td>Hyderabad</td>
+                  <td>0</td>
+                  <td>50,000</td>
+                  <td>12,000</td>
+                  <td>62,000</td>
+                  <td>12,000</td>
+                  <td>50,000</td>
+                  <td>12,000</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Karimnagar</td>
+                  <td>0</td>
+                  <td>4,500</td>
+                  <td>1,080</td>
+                  <td>5,580</td>
+                  <td>5,580</td>
+                  <td>0</td>
+                  <td>5,580</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>Vemuri Venkata Ratnam</td>
+                  <td>Nellore</td>
+                  <td>0</td>
+                  <td>5,500</td>
+                  <td>1,320</td>
+                  <td>6,820</td>
+                  <td>6,820</td>
+                  <td>0</td>
+                  <td>6,820</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>Mothukuru Vengaiah (Ramesh Brother)</td>
+                  <td>Narrawada</td>
+                  <td>0</td>
+                  <td>620</td>
+                  <td>149</td>
+                  <td>769</td>
+                  <td>0</td>
+                  <td>770</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>Thotaboyina Gangarao</td>
+                  <td>Narrwada</td>
+                  <td>0</td>
+                  <td>460</td>
+                  <td>110</td>
+                  <td>570</td>
+                  <td>570</td>
+                  <td>0</td>
+                  <td>570</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>Vemuri Vengaiah (Ganachari)</td>
+                  <td>Narrwada</td>
+                  <td>0</td>
+                  <td>15,376</td>
+                  <td>3,690</td>
+                  <td>19,066</td>
+                  <td>0</td>
+                  <td>19,100</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Maharastra</td>
+                  <td>12,000</td>
+                  <td>500</td>
+                  <td>120</td>
+                  <td>12,620</td>
+                  <td>0</td>
+                  <td>12,620</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>11</td>
+                  <td>Vemuri Venkateswarlu</td>
+                  <td>Bhimavaram</td>
+                  <td>16,000</td>
+                  <td>1,000</td>
+                  <td>240</td>
+                  <td>17,240</td>
+                  <td>1,240</td>
+                  <td>16,000</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>12</td>
+                  <td>Vemuri Ankaiah</td>
+                  <td>Vinjamur</td>
+                  <td>0</td>
+                  <td>1,000</td>
+                  <td>240</td>
+                  <td>1,240</td>
+                  <td>1,240</td>
+                  <td>0</td>
+                  <td>1,240</td>
+                </tr>
+                <tr>
+                  <td>13</td>
+                  <td>Adhilakshamma</td>
+                  <td>Bairaram</td>
+                  <td>0</td>
+                  <td>6,100</td>
+                  <td>1,464</td>
+                  <td>7,600</td>
+                  <td>7,600</td>
+                  <td>0</td>
+                  <td>7,600</td>
+                </tr>
+                <tr>
+                  <td>14</td>
+                  <td>Vemuri Vengaiah</td>
+                  <td>Nellore</td>
+                  <td>0</td>
+                  <td>1,000</td>
+                  <td>240</td>
+                  <td>1,240</td>
+                  <td>1,240</td>
+                  <td>0</td>
+                  <td>1,240</td>
+                </tr>
+                <tr>
+                  <td>15</td>
+                  <td>Vemuri Guravaiah</td>
+                  <td>NA</td>
+                  <td>0</td>
+                  <td>100</td>
+                  <td>24</td>
+                  <td>124</td>
+                  <td>0</td>
+                  <td>130</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>16</td>
+                  <td>Vemuri Venkata Ratnam (Eluru/Kisanagar)</td>
+                  <td>Nellore</td>
+                  <td></td>
+                  <td></td>
+                  <td>Interest</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>12,400</td>
+                </tr>
+                <tr>
+                  <td>16</td>
+                  <td>Vemuri Venkata Ratnam (old)</td>
+                  <td>Nellore</td>
+                  <td></td>
+                  <td></td>
+                  <td>Patha Jamma</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>21,240</td>
+                </tr>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="8" style="text-align: center; font-weight: bold;">Total:</td>
+                  <!--<td style="font-weight: bold;">₹28,000</td><td style="font-weight: bold;">₹93,156</td><td style="font-weight: bold;">₹22,357</td><td style="font-weight: bold;">₹1,43,549</td><td style="font-weight: bold;">₹44,970</td>-->
+                  <td style="font-weight: bold;">₹98,621</td>
+                  <td style="font-weight: bold;">₹77,430</td>
+                </tr>
+                <tr>
+                  <td colspan="9" style="text-align: center; font-weight: bold;">Grand Total:</td>
+                  <td style="font-weight: bold;">₹1,76,051</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+		</div>
+	</div>
+	
+	<script>
+    function filterData() {
+      const selectedYear = document.getElementById("yearSelect").value;
+      const data2023 = document.getElementById("data2023");
+
+      if (selectedYear === "2023") {
+        data2023.style.display = "block";
+      } else {
+        data2023.style.display = "none";
+      }
+	  const data2024 = document.getElementById("data2024");
+
+      if (selectedYear === "2024") {
+        data2024.style.display = "block";
+      } else {
+        data2024.style.display = "none";
+      }
+	  
+	  const data = document.getElementById("data");
+
+      if (selectedYear === "") {
+        data.style.display = "block";
+      } else {
+        data.style.display = "none";
+      }
+    }
+
+    // Set default view
+    filterData();
+  </script>
+  
+          <div id="contact" class="tab-content">
+            <h2 style="color: #8e44ad; text-align: left;">Contact Us</h2>
+            <p>Email: sgvsvd@gmail.com</p>
+            <p>Phone: +91-9493385440 || 9347257727</p>
+            <p>Address: Sri Gurava Veera Vengamamba Devarillu, Vemuri vari palle, Vaddepalem, Narrawada, Nellore Dist.</p>
+          </div>
+  </body>
+  <div class="footer"> © SGVSVD Temple </div>
+</html>
